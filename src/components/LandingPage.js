@@ -63,7 +63,6 @@ const LandingPage = ({ isLoaded }) => {
     setHearts(newHearts);
 
     // Mouse tracking for parallax - disabled on mobile for performance
-    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const handleMouseMove = (e) => {
       if (isMobile) return; // Skip mouse tracking on mobile
       if (mouseTimeoutRef.current) {
@@ -104,7 +103,6 @@ const LandingPage = ({ isLoaded }) => {
     window.addEventListener('mousemove', handleMouseMove);
     
     // Scroll tracking for parallax - optimized for mobile
-    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const handleScroll = () => {
       if (scrollTimeoutRef.current) {
         cancelAnimationFrame(scrollTimeoutRef.current);
