@@ -36,9 +36,13 @@ const LandingPage = ({ isLoaded }) => {
   ], []);
 
   useEffect(() => {
-    // Create floating particles with variety - reduced for performance
+    // Detect mobile device for performance optimization
+    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Create floating particles with variety - significantly reduced on mobile
     const particleTypes = ['✨', '💫', '⭐', '🌟', '💖', '💝', '💎', '🌙'];
-    const newParticles = Array.from({ length: 20 }, (_, i) => ({
+    const particleCount = isMobile ? 8 : 20;
+    const newParticles = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 5,
@@ -48,8 +52,9 @@ const LandingPage = ({ isLoaded }) => {
     }));
     setParticles(newParticles);
 
-    // Create floating hearts - reduced for performance
-    const newHearts = Array.from({ length: 10 }, (_, i) => ({
+    // Create floating hearts - significantly reduced on mobile
+    const heartCount = isMobile ? 4 : 10;
+    const newHearts = Array.from({ length: heartCount }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 8,
@@ -57,8 +62,10 @@ const LandingPage = ({ isLoaded }) => {
     }));
     setHearts(newHearts);
 
-    // Mouse tracking for parallax - debounced for performance
+    // Mouse tracking for parallax - disabled on mobile for performance
+    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const handleMouseMove = (e) => {
+      if (isMobile) return; // Skip mouse tracking on mobile
       if (mouseTimeoutRef.current) {
         cancelAnimationFrame(mouseTimeoutRef.current);
       }
@@ -96,14 +103,16 @@ const LandingPage = ({ isLoaded }) => {
 
     window.addEventListener('mousemove', handleMouseMove);
     
-    // Scroll tracking for parallax - debounced for performance
+    // Scroll tracking for parallax - optimized for mobile
+    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const handleScroll = () => {
       if (scrollTimeoutRef.current) {
         cancelAnimationFrame(scrollTimeoutRef.current);
       }
       scrollTimeoutRef.current = requestAnimationFrame(() => {
         const currentScrollY = window.scrollY;
-        setScrollY(currentScrollY);
+        // Disable parallax on mobile for better performance
+        setScrollY(isMobile ? 0 : currentScrollY);
         setShowBackToTop(currentScrollY > 500);
       });
     };
@@ -238,16 +247,18 @@ const LandingPage = ({ isLoaded }) => {
         />
         <div className="bg-image-overlay"></div>
         <div className="bg-pattern-dots"></div>
-        {/* Additional decorative elements - reduced for performance */}
-        <div className="bg-sparkles">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <span key={i} className="sparkle" style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-            }}>✨</span>
-          ))}
-        </div>
+        {/* Additional decorative elements - reduced for performance, disabled on mobile */}
+        {typeof window !== 'undefined' && (window.innerWidth > 768) && (
+          <div className="bg-sparkles">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <span key={i} className="sparkle" style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+              }}>✨</span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Animated Gradient Orbs */}
@@ -356,7 +367,11 @@ const LandingPage = ({ isLoaded }) => {
       </section>
 
       {/* Wedding Card Section */}
-      <section className="wedding-card-section" style={{ transform: `translateY(${scrollY * 0.1}px)` }}>
+      <section className="wedding-card-section" style={{ 
+        transform: typeof window !== 'undefined' && window.innerWidth <= 768 
+          ? 'none' 
+          : `translateY(${scrollY * 0.1}px)` 
+      }}>
         <div className="section-container">
           <div className="section-title-wrapper">
             <h2 className="section-title">Our Wedding Invitation</h2>
@@ -510,7 +525,11 @@ const LandingPage = ({ isLoaded }) => {
       </section>
 
       {/* Timeline Section */}
-      <section className="timeline-section" style={{ transform: `translateY(${scrollY * 0.05}px)` }}>
+      <section className="timeline-section" style={{ 
+        transform: typeof window !== 'undefined' && window.innerWidth <= 768 
+          ? 'none' 
+          : `translateY(${scrollY * 0.05}px)` 
+      }}>
         <div className="section-container">
           <div className="section-title-wrapper">
             <h2 className="section-title">Our Journey Together</h2>
@@ -571,7 +590,11 @@ const LandingPage = ({ isLoaded }) => {
       </section>
 
       {/* Photo Gallery Section */}
-      <section className="gallery-section" style={{ transform: `translateY(${scrollY * 0.08}px)` }}>
+      <section className="gallery-section" style={{ 
+        transform: typeof window !== 'undefined' && window.innerWidth <= 768 
+          ? 'none' 
+          : `translateY(${scrollY * 0.08}px)` 
+      }}>
         <div className="section-container">
           <div className="section-title-wrapper">
             <h2 className="section-title">Memories to Cherish</h2>

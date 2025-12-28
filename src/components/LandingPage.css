@@ -342,6 +342,7 @@ section.section-visible {
   opacity: 0.6;
   filter: drop-shadow(0 0 10px rgba(255, 192, 203, 0.8));
   z-index: 1;
+  contain: layout style paint;
 }
 
 @keyframes heartFloat {
@@ -381,6 +382,8 @@ section.section-visible {
   filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8));
   will-change: transform;
   z-index: 1;
+  /* Optimize for mobile */
+  contain: layout style paint;
 }
 
 @keyframes particleFloat {
@@ -1617,11 +1620,65 @@ section.section-visible {
 
 /* Mobile-first responsive design */
 @media (max-width: 768px) {
+  /* Performance optimizations for mobile */
+  .landing-page {
+    padding: 8px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    /* Disable heavy animations on mobile */
+    animation: none !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  /* Disable parallax transforms on mobile */
+  .wedding-card-section,
+  .timeline-section,
+  .gallery-section {
+    transform: none !important;
+    will-change: auto !important;
+  }
+
+  /* Reduce background animations */
+  .bg-pattern-layer,
+  .bg-gradient-overlay {
+    animation: none !important;
+  }
+
+  .bg-image {
+    opacity: 0.2;
+    animation: none !important;
+  }
+
+  .bg-image-overlay {
+    background: 
+      radial-gradient(circle at center, rgba(26, 11, 46, 0.8) 0%, rgba(26, 11, 46, 0.95) 100%),
+      linear-gradient(135deg, rgba(26, 11, 46, 0.85) 0%, rgba(45, 27, 78, 0.7) 100%);
+  }
+
+  /* Disable gradient orbs on mobile */
+  .gradient-orb {
+    display: none;
+  }
+
+  /* Reduce particle animations */
+  .particle,
+  .floating-heart {
+    animation-duration: 6s !important;
+    will-change: auto;
+  }
+
+  .particles-container {
+    pointer-events: none;
+  }
+
   .back-to-top-btn {
     width: 50px;
     height: 50px;
     bottom: 20px;
     right: 20px;
+    touch-action: manipulation;
   }
 
   .back-to-top-icon {
@@ -1635,22 +1692,6 @@ section.section-visible {
   .timeline-image-wrapper {
     width: 100px;
     height: 100px;
-  }
-
-  .landing-page {
-    padding: 8px;
-    min-height: 100vh;
-    min-height: 100dvh;
-  }
-
-  .bg-image {
-    opacity: 0.2;
-  }
-
-  .bg-image-overlay {
-    background: 
-      radial-gradient(circle at center, rgba(26, 11, 46, 0.8) 0%, rgba(26, 11, 46, 0.95) 100%),
-      linear-gradient(135deg, rgba(26, 11, 46, 0.85) 0%, rgba(45, 27, 78, 0.7) 100%);
   }
 
   .landing-content {
@@ -1853,6 +1894,45 @@ section.section-visible {
   .decorative-flowers {
     font-size: 2.5rem;
     opacity: 0.3;
+    animation: none !important;
+    will-change: auto;
+  }
+
+  /* Disable heavy card animations on mobile */
+  .wedding-card {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Optimize gallery for mobile */
+  .gallery-item {
+    animation: fadeInUp 0.6s ease-out both !important;
+    will-change: auto;
+  }
+
+  .gallery-item:hover {
+    transform: none !important;
+  }
+
+  /* Reduce decorative animations */
+  .bg-sparkles {
+    display: none;
+  }
+
+  /* Optimize scroll performance */
+  section {
+    transform: none !important;
+    will-change: auto;
+  }
+
+  /* Touch optimizations */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  button, a {
+    touch-action: manipulation;
   }
 
   .flower-1 {
