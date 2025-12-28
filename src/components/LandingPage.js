@@ -1,5 +1,5 @@
 // AI assisted development
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import './LandingPage.css';
 
 const LandingPage = ({ isLoaded }) => {
@@ -8,13 +8,13 @@ const LandingPage = ({ isLoaded }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [cardMousePosition, setCardMousePosition] = useState({ x: 0, y: 0 });
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState(0);
   const [scrollY, setScrollY] = useState(0);
-  const [visibleSections, setVisibleSections] = useState(new Set());
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const scrollTimeoutRef = useRef(null);
+  const mouseTimeoutRef = useRef(null);
 
-  const events = [
+  const events = useMemo(() => [
     {
       title: 'Sangeet & Haldi',
       date: '07 January 2026',
@@ -33,12 +33,12 @@ const LandingPage = ({ isLoaded }) => {
       venue: 'Hotel Sayaji, Raipur',
       icon: '🎉',
     },
-  ];
+  ], []);
 
   useEffect(() => {
-    // Create floating particles with variety
+    // Create floating particles with variety - reduced for performance
     const particleTypes = ['✨', '💫', '⭐', '🌟', '💖', '💝', '💎', '🌙'];
-    const newParticles = Array.from({ length: 40 }, (_, i) => ({
+    const newParticles = Array.from({ length: 20 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 5,
@@ -48,8 +48,8 @@ const LandingPage = ({ isLoaded }) => {
     }));
     setParticles(newParticles);
 
-    // Create floating hearts
-    const newHearts = Array.from({ length: 20 }, (_, i) => ({
+    // Create floating hearts - reduced for performance
+    const newHearts = Array.from({ length: 10 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 8,
@@ -57,11 +57,16 @@ const LandingPage = ({ isLoaded }) => {
     }));
     setHearts(newHearts);
 
-    // Mouse tracking for parallax
+    // Mouse tracking for parallax - debounced for performance
     const handleMouseMove = (e) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100,
+      if (mouseTimeoutRef.current) {
+        cancelAnimationFrame(mouseTimeoutRef.current);
+      }
+      mouseTimeoutRef.current = requestAnimationFrame(() => {
+        setMousePosition({
+          x: (e.clientX / window.innerWidth) * 100,
+          y: (e.clientY / window.innerHeight) * 100,
+        });
       });
     };
 
@@ -91,11 +96,16 @@ const LandingPage = ({ isLoaded }) => {
 
     window.addEventListener('mousemove', handleMouseMove);
     
-    // Scroll tracking for parallax
+    // Scroll tracking for parallax - debounced for performance
     const handleScroll = () => {
-      setScrollY(window.scrollY);
-      // Show back to top button after scrolling
-      setShowBackToTop(window.scrollY > 500);
+      if (scrollTimeoutRef.current) {
+        cancelAnimationFrame(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+        setScrollY(currentScrollY);
+        setShowBackToTop(currentScrollY > 500);
+      });
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     
@@ -130,8 +140,9 @@ const LandingPage = ({ isLoaded }) => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          setVisibleSections(prev => new Set([...prev, entry.target.className]));
           entry.target.classList.add('section-visible');
+          // Unobserve after animation to improve performance
+          observer.unobserve(entry.target);
         }
       });
     }, observerOptions);
@@ -154,6 +165,12 @@ const LandingPage = ({ isLoaded }) => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
+      if (scrollTimeoutRef.current) {
+        cancelAnimationFrame(scrollTimeoutRef.current);
+      }
+      if (mouseTimeoutRef.current) {
+        cancelAnimationFrame(mouseTimeoutRef.current);
+      }
       const cardElement = document.querySelector('.wedding-card-section .wedding-card');
       if (cardElement) {
         cardElement.removeEventListener('mouseenter', handleCardMouseEnter);
@@ -163,7 +180,7 @@ const LandingPage = ({ isLoaded }) => {
       observer.disconnect();
       clearInterval(countdownInterval);
     };
-  }, []);
+  }, [isCardHovered]);
 
   return (
     <div className={`landing-page ${isLoaded ? 'loaded' : ''}`}>
@@ -213,15 +230,17 @@ const LandingPage = ({ isLoaded }) => {
       {/* Background Image - Premium Wedding Image */}
       <div className="bg-image-layer">
         <img 
-          src="https://images.unsplash.com/photo-1519162808019-7de1683fa2ad?w=1200&q=80&auto=format&fit=crop" 
+          src="https://images.unsplash.com/photo-1519162808019-7de1683fa2ad?w=1200&q=75&auto=format&fit=crop" 
           alt="Wedding background" 
           className="bg-image"
+          loading="eager"
+          fetchpriority="high"
         />
         <div className="bg-image-overlay"></div>
         <div className="bg-pattern-dots"></div>
-        {/* Additional decorative elements */}
+        {/* Additional decorative elements - reduced for performance */}
         <div className="bg-sparkles">
-          {Array.from({ length: 15 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <span key={i} className="sparkle" style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -393,7 +412,11 @@ const LandingPage = ({ isLoaded }) => {
                 <div className="groom-section">
                   <div className="name-image-wrapper">
                     <div className="name-image-frame groom-frame">
-                      <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=150&q=80&auto=format&fit=crop" alt="Groom" />
+                      <img 
+                        src="https://images.unsplash.com/photo-1519741497674-611481863552?w=150&q=75&auto=format&fit=crop" 
+                        alt="Groom" 
+                        loading="lazy"
+                      />
                       <div className="image-glow"></div>
                     </div>
                   </div>
@@ -420,7 +443,11 @@ const LandingPage = ({ isLoaded }) => {
                 <div className="bride-section">
                   <div className="name-image-wrapper">
                     <div className="name-image-frame bride-frame">
-                      <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=150&q=80&auto=format&fit=crop" alt="Bride" />
+                      <img 
+                        src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=150&q=75&auto=format&fit=crop" 
+                        alt="Bride" 
+                        loading="lazy"
+                      />
                       <div className="image-glow"></div>
                     </div>
                   </div>
@@ -496,7 +523,11 @@ const LandingPage = ({ isLoaded }) => {
           <div className="timeline">
             <div className="timeline-item">
               <div className="timeline-image-wrapper">
-                <img src="https://media.istockphoto.com/id/2168707868/photo/indian-couple-holding-hand-close-up-in-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=YohVKdmbHl85l5Iy_retZo7uMDh53b7B-TEx5EmxF5c=" alt="First Meeting" />
+                <img 
+                  src="https://media.istockphoto.com/id/2168707868/photo/indian-couple-holding-hand-close-up-in-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=YohVKdmbHl85l5Iy_retZo7uMDh53b7B-TEx5EmxF5c=" 
+                  alt="First Meeting" 
+                  loading="lazy"
+                />
                 <div className="timeline-image-overlay"></div>
               </div>
               <div className="timeline-icon">💑</div>
@@ -507,7 +538,11 @@ const LandingPage = ({ isLoaded }) => {
             </div>
             <div className="timeline-item">
               <div className="timeline-image-wrapper">
-                <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=300&q=80&auto=format&fit=crop" alt="Engagement" />
+                <img 
+                  src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=300&q=75&auto=format&fit=crop" 
+                  alt="Engagement" 
+                  loading="lazy"
+                />
                 <div className="timeline-image-overlay"></div>
               </div>
               <div className="timeline-icon">💍</div>
@@ -518,7 +553,11 @@ const LandingPage = ({ isLoaded }) => {
             </div>
             <div className="timeline-item">
               <div className="timeline-image-wrapper">
-                <img src="https://media.istockphoto.com/id/2148405076/photo/smiling-bride-and-groom-ready-to-exchange-floral-garlands-during-their-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=PxQ4t9dX-xn-_BfH__ecqsXt_YGpbq2WH73vQGIQK-E=" alt="Wedding Day" />
+                <img 
+                  src="https://media.istockphoto.com/id/2148405076/photo/smiling-bride-and-groom-ready-to-exchange-floral-garlands-during-their-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=PxQ4t9dX-xn-_BfH__ecqsXt_YGpbq2WH73vQGIQK-E=" 
+                  alt="Wedding Day" 
+                  loading="lazy"
+                />
                 <div className="timeline-image-overlay"></div>
               </div>
               <div className="timeline-icon">💒</div>
@@ -544,37 +583,61 @@ const LandingPage = ({ isLoaded }) => {
           </div>
           <div className="gallery-grid">
             <div className="gallery-item">
-              <img src="https://media.istockphoto.com/id/2168707868/photo/indian-couple-holding-hand-close-up-in-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=YohVKdmbHl85l5Iy_retZo7uMDh53b7B-TEx5EmxF5c=" alt="Indian Couple Holding Hands" />
+              <img 
+                src="https://media.istockphoto.com/id/2168707868/photo/indian-couple-holding-hand-close-up-in-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=YohVKdmbHl85l5Iy_retZo7uMDh53b7B-TEx5EmxF5c=" 
+                alt="Indian Couple Holding Hands" 
+                loading="lazy"
+              />
               <div className="gallery-overlay">
                 <span className="gallery-icon">💕</span>
               </div>
             </div>
             <div className="gallery-item">
-              <img src="https://media.istockphoto.com/id/2148405076/photo/smiling-bride-and-groom-ready-to-exchange-floral-garlands-during-their-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=PxQ4t9dX-xn-_BfH__ecqsXt_YGpbq2WH73vQGIQK-E=" alt="Bride and Groom Exchange Garlands" />
+              <img 
+                src="https://media.istockphoto.com/id/2148405076/photo/smiling-bride-and-groom-ready-to-exchange-floral-garlands-during-their-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=PxQ4t9dX-xn-_BfH__ecqsXt_YGpbq2WH73vQGIQK-E=" 
+                alt="Bride and Groom Exchange Garlands" 
+                loading="lazy"
+              />
               <div className="gallery-overlay">
                 <span className="gallery-icon">💍</span>
               </div>
             </div>
             <div className="gallery-item">
-              <img src="https://media.istockphoto.com/id/2240916784/photo/groom-tying-a-toe-ring-on-the-brides-foot-during-a-traditional-indian-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=RsQpA7lwHooopwa6OrcdVurUL4XU6JIDNywDRKVY1t0=" alt="Traditional Indian Wedding Ceremony" />
+              <img 
+                src="https://media.istockphoto.com/id/2240916784/photo/groom-tying-a-toe-ring-on-the-brides-foot-during-a-traditional-indian-wedding-ceremony.webp?a=1&b=1&s=612x612&w=0&k=20&c=RsQpA7lwHooopwa6OrcdVurUL4XU6JIDNywDRKVY1t0=" 
+                alt="Traditional Indian Wedding Ceremony" 
+                loading="lazy"
+              />
               <div className="gallery-overlay">
                 <span className="gallery-icon">💑</span>
               </div>
             </div>
             <div className="gallery-item">
-              <img src="https://plus.unsplash.com/premium_photo-1661317241247-08599f9869ca?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8d2VkZGluZyUyMGltYWdlc3xlbnwwfHwwfHx8MA%3D%3D" alt="Wedding Celebration" />
+              <img 
+                src="https://plus.unsplash.com/premium_photo-1661317241247-08599f9869ca?w=700&auto=format&fit=crop&q=75&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8d2VkZGluZyUyMGltYWdlc3xlbnwwfHwwfHx8MA%3D%3D" 
+                alt="Wedding Celebration" 
+                loading="lazy"
+              />
               <div className="gallery-overlay">
                 <span className="gallery-icon">💎</span>
               </div>
             </div>
             <div className="gallery-item">
-              <img src="https://plus.unsplash.com/premium_photo-1682092597591-81f59c80d9ec?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHdlZGRpbmclMjBpbWFnZXMlMjBpbmRpYXxlbnwwfHwwfHx8MA%3D%3D" alt="Wedding Couple Together" />
+              <img 
+                src="https://plus.unsplash.com/premium_photo-1682092597591-81f59c80d9ec?w=700&auto=format&fit=crop&q=75&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHdlZGRpbmclMjBpbWFnZXMlMjBpbmRpYXxlbnwwfHwwfHx8MA%3D%3D" 
+                alt="Wedding Couple Together" 
+                loading="lazy"
+              />
               <div className="gallery-overlay">
                 <span className="gallery-icon">🌹</span>
               </div>
             </div>
             <div className="gallery-item">
-              <img src="https://images.unsplash.com/photo-1639945506968-3dea2042c861?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8d2VkZGluZyUyMGltYWdlc3xlbnwwfHwwfHx8MA%3D%3D" alt="Wedding Rings Beautiful" />
+              <img 
+                src="https://images.unsplash.com/photo-1639945506968-3dea2042c861?w=700&auto=format&fit=crop&q=75&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8d2VkZGluZyUyMGltYWdlc3xlbnwwfHwwfHx8MA%3D%3D" 
+                alt="Wedding Rings Beautiful" 
+                loading="lazy"
+              />
               <div className="gallery-overlay">
                 <span className="gallery-icon">✨</span>
               </div>
@@ -586,7 +649,11 @@ const LandingPage = ({ isLoaded }) => {
       {/* RSVP Section */}
       <section className="rsvp-section">
         <div className="rsvp-bg-image">
-          <img src="https://images.unsplash.com/photo-1519162808019-7de1683fa2ad?w=1200&q=80&auto=format&fit=crop" alt="RSVP Background" />
+          <img 
+            src="https://images.unsplash.com/photo-1519162808019-7de1683fa2ad?w=1200&q=75&auto=format&fit=crop" 
+            alt="RSVP Background" 
+            loading="lazy"
+          />
           <div className="rsvp-bg-overlay"></div>
         </div>
         <div className="section-container">
@@ -679,10 +746,18 @@ const LandingPage = ({ isLoaded }) => {
       
       {/* Floating Photo Frames */}
       <div className="photo-frame photo-frame-1">
-        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=200&q=80&auto=format&fit=crop" alt="Wedding" />
+        <img 
+          src="https://images.unsplash.com/photo-1519741497674-611481863552?w=200&q=75&auto=format&fit=crop" 
+          alt="Wedding" 
+          loading="lazy"
+        />
       </div>
       <div className="photo-frame photo-frame-2">
-        <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=200&q=80&auto=format&fit=crop" alt="Wedding" />
+        <img 
+          src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=200&q=75&auto=format&fit=crop" 
+          alt="Wedding" 
+          loading="lazy"
+        />
       </div>
     </div>
   );
