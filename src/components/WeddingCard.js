@@ -11,13 +11,19 @@ const WeddingCard = ({ onClose }) => {
   useEffect(() => {
     setTimeout(() => setIsOpen(true), 100);
 
-    // Scroll tracking for parallax
+    // Detect mobile device for performance optimization
+    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Scroll tracking for parallax - disabled on mobile for performance
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (!isMobile) {
+        setScrollY(window.scrollY);
+      }
     };
 
-    // Mouse tracking for 3D effects
+    // Mouse tracking for 3D effects - disabled on mobile for performance
     const handleMouseMove = (e) => {
+      if (isMobile) return; // Skip on mobile
       const card = document.querySelector('.wedding-card');
       if (card) {
         const rect = card.getBoundingClientRect();
@@ -30,12 +36,16 @@ const WeddingCard = ({ onClose }) => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('mousemove', handleMouseMove);
+    if (!isMobile) {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('mousemove', handleMouseMove);
+    }
     
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mousemove', handleMouseMove);
+      if (!isMobile) {
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('mousemove', handleMouseMove);
+      }
     };
   }, []);
 
@@ -65,9 +75,11 @@ const WeddingCard = ({ onClose }) => {
       {/* Background Image - Premium Wedding Decoration */}
       <div className="card-bg-image-layer">
         <img 
-          src="https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80&auto=format&fit=crop" 
+          src="https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=75&auto=format&fit=crop" 
           alt="Wedding decoration" 
           className="card-bg-image"
+          loading="lazy"
+          decoding="async"
         />
         <div className="card-bg-overlay"></div>
         <div className="card-pattern-dots"></div>
@@ -90,8 +102,12 @@ const WeddingCard = ({ onClose }) => {
         <div 
           className="wedding-card"
           style={{
-            transform: `perspective(1000px) rotateY(${mousePosition.x}deg) rotateX(${-mousePosition.y}deg)`,
-            transition: 'transform 0.1s ease-out',
+            transform: typeof window !== 'undefined' && window.innerWidth <= 768
+              ? 'none'
+              : `perspective(1000px) rotateY(${mousePosition.x}deg) rotateX(${-mousePosition.y}deg)`,
+            transition: typeof window !== 'undefined' && window.innerWidth <= 768
+              ? 'none'
+              : 'transform 0.1s ease-out',
           }}
         >
           {/* Glassmorphism Overlay */}
@@ -143,7 +159,12 @@ const WeddingCard = ({ onClose }) => {
             <div className="groom-section">
               <div className="name-image-wrapper">
                 <div className="name-image-frame groom-frame">
-                  <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=150&q=80&auto=format&fit=crop" alt="Groom" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1519741497674-611481863552?w=150&q=75&auto=format&fit=crop" 
+                    alt="Groom" 
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="image-glow"></div>
                 </div>
               </div>
@@ -170,7 +191,12 @@ const WeddingCard = ({ onClose }) => {
             <div className="bride-section">
               <div className="name-image-wrapper">
                 <div className="name-image-frame bride-frame">
-                  <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=150&q=80&auto=format&fit=crop" alt="Bride" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=150&q=75&auto=format&fit=crop" 
+                    alt="Bride" 
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="image-glow"></div>
                 </div>
               </div>
@@ -230,9 +256,11 @@ const WeddingCard = ({ onClose }) => {
             {/* Decorative Pond Scene with Premium Image */}
             <div className="pond-scene">
               <img 
-                src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=80&auto=format&fit=crop" 
+                src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=75&auto=format&fit=crop" 
                 alt="Wedding decoration" 
                 className="pond-bg-image"
+                loading="lazy"
+                decoding="async"
               />
               <div className="pond-water"></div>
               <div className="pond-overlay"></div>
@@ -251,15 +279,30 @@ const WeddingCard = ({ onClose }) => {
               <h3 className="gallery-title">Memories to Cherish</h3>
               <div className="gallery-grid">
                 <div className="gallery-item">
-                  <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=300&q=80&auto=format&fit=crop" alt="Gallery" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1519741497674-611481863552?w=300&q=75&auto=format&fit=crop" 
+                    alt="Gallery" 
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="gallery-overlay"></div>
                 </div>
                 <div className="gallery-item">
-                  <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=300&q=80&auto=format&fit=crop" alt="Gallery" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=300&q=75&auto=format&fit=crop" 
+                    alt="Gallery" 
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="gallery-overlay"></div>
                 </div>
                 <div className="gallery-item">
-                  <img src="https://images.unsplash.com/photo-1519162808019-7de1683fa2ad?w=300&q=80&auto=format&fit=crop" alt="Gallery" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1519162808019-7de1683fa2ad?w=300&q=75&auto=format&fit=crop" 
+                    alt="Gallery" 
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="gallery-overlay"></div>
                 </div>
               </div>

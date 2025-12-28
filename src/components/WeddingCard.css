@@ -1994,13 +1994,44 @@
   }
 
   .card-bg-image {
-    opacity: 0.1;
+    opacity: 0.08;
+    animation: none !important;
+    transform: scale(1) !important;
   }
 
   .card-bg-overlay {
     background: 
-      radial-gradient(circle at center, rgba(45, 27, 78, 0.7) 0%, rgba(45, 27, 78, 0.9) 100%),
-      linear-gradient(135deg, rgba(45, 27, 78, 0.75) 0%, rgba(74, 44, 106, 0.65) 100%);
+      radial-gradient(circle at center, rgba(45, 27, 78, 0.8) 0%, rgba(45, 27, 78, 0.95) 100%),
+      linear-gradient(135deg, rgba(45, 27, 78, 0.85) 0%, rgba(74, 44, 106, 0.75) 100%);
+  }
+
+  .wedding-card-container {
+    animation: fadeIn 0.5s ease-out !important;
+  }
+
+  /* GPU acceleration for smoother rendering */
+  .card-wrapper,
+  .wedding-card {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Reduce repaints */
+  .card-content {
+    contain: layout style paint;
+  }
+
+  /* Optimize background layers */
+  .card-bg-image-layer {
+    transform: translateZ(0);
+    will-change: auto;
+  }
+
+  .card-bg-image {
+    transform: translateZ(0);
+    will-change: auto;
   }
 
   .pond-scene {
@@ -2423,6 +2454,92 @@
 
   .wedding-card {
     transform: none !important;
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    will-change: auto !important;
+  }
+
+  /* Disable expensive animations on mobile */
+  .card-border-outer {
+    animation: none !important;
+    filter: none !important;
+  }
+
+  .gradient-mesh {
+    animation: none !important;
+    opacity: 0.2 !important;
+  }
+
+  .glass-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    opacity: 0.2 !important;
+  }
+
+  .floral-corner {
+    animation: none !important;
+    opacity: 0.2 !important;
+    filter: none !important;
+  }
+
+  .corner-mandala {
+    animation: none !important;
+    opacity: 0.1 !important;
+  }
+
+  .floating-decorations .decoration {
+    animation: none !important;
+    opacity: 0.2 !important;
+  }
+
+  .card-bg-image {
+    animation: none !important;
+  }
+
+  .card-pattern-dots {
+    animation: none !important;
+  }
+
+  .invocation {
+    animation: none !important;
+  }
+
+  .event-item {
+    animation: fadeInUp 0.4s ease-out both !important;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .pond-scene {
+    animation: none !important;
+  }
+
+  .pond-bg-image {
+    animation: none !important;
+  }
+
+  .pond-water {
+    animation: none !important;
+  }
+
+  .lotus-flower,
+  .swan,
+  .peacock {
+    animation: none !important;
+  }
+
+  .gallery-item {
+    animation: fadeInUp 0.4s ease-out both !important;
   }
 
   .events-section-title {
